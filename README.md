@@ -29,4 +29,12 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
 - Python 3: Ensure that Python 3 is installed on your system.
 - Scapy: Ensure you have Scapy library installed because Scapy is the root core of this tool. (pip3 install scapy)
 
+## Disclaimer
+- Use this tool responsibly and only on networks you have permission to test. Unauthorized use of this tool can lead to legal consequences.
+
+## License
+- This project is licensed under the GNU General Public License.
+
+## Author
+- Kuraiyume (A1SBERG)
 
