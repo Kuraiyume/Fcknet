@@ -17,14 +17,12 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
    ```
 
 2. Available Commands:
-   ```
-   arp_spoof: Execute ARP Spoofing.
-   dhcp_starv: Conduct DHCP Starvation.
-   net_scan: Perform a Network Scan.
-   syn_flood: Initiate a SYN Flood Attack.
-   help or h: Display the list of commands.
-   exit or quit: Terminate the program.
-   ```
+- **arp_spoof:** Execute ARP Spoofing.
+- **dhcp_starv:** Conduct DHCP Starvation.
+- **net_scan:** Perform a Network Scan.
+- **syn_flood:** Initiate a SYN Flood Attack.
+- **help or h:** Display the list of commands.
+- **exit or quit:** Terminate the program.
 
 ## Requirements
 - Root Access: FckNet requires root privileges to perform its functions.
