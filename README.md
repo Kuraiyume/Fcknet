@@ -1,6 +1,6 @@
 # FckNet: Network Attack Toolkit
 
-FckNet is a versatile network manipulation tool that utilizes **Scapy** for all its features, enabling users to perform various network-related tasks. It supports several functionalities, including ARP spoofing, DHCP starvation, network scanning, and SYN flooding.
+FckNet is a versatile network manipulation tool that utilizes **Scapy** for all its features, enabling users to perform various network-related tasks. It supports several functionalities, including ARP spoofing, DHCP starvation, network scanning, SYN flooding, DDoS POST Req.
 
 ## Features
 
@@ -8,6 +8,7 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
 - **DHCP Starvation**: Flood the DHCP server with requests to exhaust its available IP addresses.
 - **Network Scanning**: Discover active devices on a network and retrieve their IP and MAC addresses.
 - **SYN Flooding**: Launch a SYN flood attack to overwhelm a target system.
+- **DDoS POST**: Launch a large number of POST requests to overwhelm a target system.
 
 ## Usage
 
@@ -21,6 +22,7 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
 - **dhcp_starv:** Conduct DHCP Starvation.
 - **net_scan:** Perform a Network Scan.
 - **syn_flood:** Initiate a SYN Flood Attack.
+- **ddos_post:** Initiate a DDoS POST Requests Attack.
 - **help or h:** Display the list of commands.
 - **exit or quit:** Terminate the program.
 
