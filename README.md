@@ -10,6 +10,7 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
 - **SYN Flooding**: Launch a SYN flood attack to overwhelm a target system.
 - **ICMP Flooding**: Launch an ICMP flood attack to overwhelm a target system.
 - **DDoS POST**: Launch a large number of POST requests to overwhelm a target system.
+- **DDoS GET**: Launch a large number of GET requests to overwhelm a target system.
 
 ## Usage
 
@@ -24,7 +25,8 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
 - **net_scan:** Perform a Network Scan.
 - **syn_flood:** Initiate a SYN Flood Attack.
 - **icmp_flood:** Initiate an ICMP Flood Attack.
-- **ddos_post:** Initiate a DDoS POST Requests Attack.
+- **ddos_post:** Perform DDoS POST Request.
+- **ddos_get:** Perform DDoS GET Request.
 - **help or h:** Display the list of commands.
 - **exit or quit:** Terminate the program.
 
