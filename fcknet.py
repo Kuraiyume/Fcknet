@@ -72,7 +72,6 @@ def validate_ip(ip):
     except socket.error:
         return False
 
-
 def get_local_ip():
     """
     Retrieve the local IP address of the machine.
@@ -83,7 +82,6 @@ def get_local_ip():
     except OSError:
         logging.error("Failed to snatch the local IP Address")
         sys.exit(1)
-
 
 ### ARP SPOOFER ###
 def get_active_hosts(interface):
@@ -102,7 +100,6 @@ def get_active_hosts(interface):
         logging.error("Failed to locate active targets: %s", e)
         return []
 
-
 def get_mac(ip):
     """
     Fetch the MAC address of a device using its IP address.
@@ -119,7 +116,6 @@ def get_mac(ip):
     except IndexError:
         pass
 
-
 def arp_spoof(target_ip, spoof_ip):
     """
     Perform ARP spoofing by sending fake ARP packets.
@@ -133,7 +129,6 @@ def arp_spoof(target_ip, spoof_ip):
         logging.info("Sent a devious ARP packet to %s", target_ip)
     else:
         logging.error("Failed to get the MAC address of the target %s", target_ip)
-
 
 def restore_arp_tables(destination_ip, source_ip):
     """
@@ -150,7 +145,6 @@ def restore_arp_tables(destination_ip, source_ip):
     else:
         logging.error("Failed to reset ARP tables for %s", destination_ip)
 
-
 def enable_ip_forwarding():
     """
     Enable IP forwarding in the system to allow packet forwarding between networks.
@@ -163,7 +157,6 @@ def enable_ip_forwarding():
                     logging.info("IP forwarding is now on")
     except IOError:
         logging.exception("Failed to flick the IP forwarding switch")
-
 
 def disable_ip_forwarding():
     """
@@ -178,7 +171,6 @@ def disable_ip_forwarding():
     except IOError:
         logging.exception("Failed to turn off IP forwarding")
 
-
 ### DHCP Starvation ###
 def create_dhcp_discover():
     """
@@ -190,7 +182,6 @@ def create_dhcp_discover():
            / UDP(sport=68, dport=67) \
            / BOOTP(op=1, chaddr=RandMAC()) \
            / DHCP(options=[('message-type', 'discover'), ('end')])
-
 
 def send_dhcp_discover(interface):
     """
@@ -205,7 +196,6 @@ def send_dhcp_discover(interface):
     except Exception as e:
         logging.exception('Failed to send packets: %s', e)
 
-
 ### Network Scanner ###
 def get_mac_and_name(ip):
     """
@@ -218,7 +208,6 @@ def get_mac_and_name(ip):
     except socket.herror:
         hostname = "Unknown"
     return hostname
-
 
 def scan_network(ip_range):
     """
@@ -236,7 +225,6 @@ def scan_network(ip_range):
         devices.append({'ip': received.psrc, 'mac': received.hwsrc, 'name': hostname})
     return devices
 
-
 def display_results(devices):
     """
     Display the results of a network scan in a formatted manner.
@@ -246,7 +234,6 @@ def display_results(devices):
     print("-" * 67)
     for device in devices:
         print(f"{device['ip']}\t\t{device['mac']}\t\t{device['name']}")
-
 
 ### SYN Flooding ###
 def generate_random_ip():
@@ -503,7 +490,6 @@ def main():
                 start_get_flood(url, packet_rate, threads, duration)
             else:
                 logging.warning("Invalid command, type 'help' for options.")
-
         except KeyboardInterrupt:
             break
 
