@@ -19,7 +19,7 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
    sudo python3 fcknet.py
    ```
 
-2. Available Commands:
+2. Available Actions:
 - **arp_spoof:** Execute ARP Spoofing.
 - **dhcp_starv:** Conduct DHCP Starvation.
 - **net_scan:** Perform a Network Scan.
@@ -29,6 +29,43 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
 - **ddos_get:** Perform DDoS GET Request.
 - **help or h:** Display the list of commands.
 - **exit or quit:** Terminate the program.
+
+## Commands && Parameters
+
+1. ARP Spoofing
+   ```bash
+   sudo python3 fcknet.py -a arp_spoof -ip <target_ip> -sip <router_ip>
+   ```
+
+2. DHCP Starvation
+   ```bash
+   sudo python3 fcknet.py -a dhcp_starv -i <interface>
+   ```
+
+3. Network Scanner
+   ```bash
+   sudo python3 fcknet.py -a net_scan -r <ip_range>
+   ```
+
+4. SYN Flooding
+   ```bash
+   sudo python3 fcknet.py -a syn_flood -ip <target_ip> -p <port> -pr <packet_rate> -t <threads> -d <duration>
+   ```
+
+5. ICMP Flooding
+   ```bash
+   sudo python3 fcknet.py -a icmp_flood -ip <target_ip> -pr <packet_rate> - t <threads> -d <duration>
+   ```
+
+6. DDoS POST
+   ```bash
+   sudo python3 fcknet.py -a ddos_post -u <URL>  -pr <packet_rate> -t <threads> -d <duration> -psize <packet_size>
+   ```
+
+7. DDoS GET
+   ```bash
+   sudo python3 fcknet.py -a ddos_get -u <URL>  -pr <packet_rate> -t <threads> -d <duration> -psize <packet_size>
+   ```
 
 ## Requirements
 - Root Access: FckNet requires root privileges to perform its functions.
