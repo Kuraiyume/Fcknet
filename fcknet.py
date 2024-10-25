@@ -398,9 +398,8 @@ def main():
     description=(
         'FckNet is an advanced network manipulation tool tailored for various network attacks. '
         'FckNet can perform ARP Spoofing, DHCP Starvation, and lots of Denial-of-Service Attacks. '
-        'USE RESPONSIBLY and ENSURE PROPER AUTHORIZATION when testing networks.'
+        'USE RESPONSIBLY and ENSURE PROPER AUTHORIZATION when testing networks.')
     )
-)
     parser.add_argument('-a', '--action', type=str, help='Command to execute')
     parser.add_argument('-ip', '--target-ip', type=str, help='Target IP address for the attack')
     parser.add_argument('-sip', '--spoof-ip', type=str, help='IP address to spoof (for ARP Spoofing)')
