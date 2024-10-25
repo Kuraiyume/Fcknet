@@ -2,7 +2,7 @@
 
 FckNet is a relentless toolkit for network manipulation, designed to seize control, exploit weaknesses, and push the limits of network security. It equips you with the means to infiltrate, disrupt, and test the resilience of any network environment.
 
-## Features
+## [+] Features
 
 - **ARP Spoofing**: Intercept and redirect network traffic by sending fake ARP packets.
 - **DHCP Starvation**: Flood the DHCP server with requests to exhaust its available IP addresses.
@@ -12,7 +12,7 @@ FckNet is a relentless toolkit for network manipulation, designed to seize contr
 - **DDoS POST**: Launch a large number of POST requests to overwhelm a target system.
 - **DDoS GET**: Launch a large number of GET requests to overwhelm a target system.
 
-## Installation
+## [+] Installation
 
 1. Clone the repository:
    ```bash
@@ -29,7 +29,7 @@ FckNet is a relentless toolkit for network manipulation, designed to seize contr
    sudo python3 fcknet.py
    ```
 
-## Commands && Parameters
+## [+] Commands and Parameters
 
 | Actions       | Description                               |
 |---------------|-------------------------------------------|
@@ -73,15 +73,15 @@ FckNet is a relentless toolkit for network manipulation, designed to seize contr
 
 7. DDoS GET
    ```bash
-   sudo python3 fcknet.py -a ddos_get -u <URL>  -pr <packet_rate> -t <threads> -d <duration> -psize <packet_size>
+   sudo python3 fcknet.py -a ddos_get -u <URL>  -pr <packet_rate> -t <threads> -d <duration>
    ```
 
-## Disclaimer
+## [+] Disclaimer
 - This toolkit is intended strictly for educational purposes or authorized testing on networks you have explicit permission to assess. Misuse of FckNet can lead to severe legal consequences. Always obtain proper authorization before conducting any network manipulation or attack simulations.
 
-## License
+## [+] License
 - This project is licensed under the GNU General Public License (GPL).
 
-## Author
+## [+] Author
 - Kuraiyume (A1SBERG)
 
