@@ -1,4 +1,4 @@
-![GIF](https://github.com/veilwr4ith/FckNet/blob/main/fckpeople.gif)
+![GIF](https://github.com/Kuraiyume/FckNet/blob/main/fckpeople.gif)
 
 # FckNet: Network Manipulation Toolkit
 
