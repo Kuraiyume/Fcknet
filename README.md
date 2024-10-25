@@ -1,3 +1,5 @@
+![GIF](https://github.com/veilwr4ith/FckNet/blob/main/fckpeople.gif)
+
 # FckNet: Network Manipulation Toolkit
 
 FckNet is a relentless toolkit for network manipulation, designed to seize control, exploit weaknesses, and push the limits of network security. It equips you with the means to infiltrate, disrupt, and test the resilience of any network environment.
