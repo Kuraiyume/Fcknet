@@ -1,4 +1,4 @@
-# FckNet: Network Attack Toolkit
+# FckNet: Network Manipulation Toolkit
 
 FckNet is a versatile network manipulation tool that utilizes **Scapy** for all its features, enabling users to perform various network-related tasks. It supports several functionalities, including ARP spoofing, DHCP starvation, network scanning, SYN flooding, DDoS POST Req.
 
