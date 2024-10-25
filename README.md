@@ -31,15 +31,15 @@ FckNet is a relentless toolkit for network manipulation, designed to seize contr
 
 ## [+] Commands and Parameters
 
-| Actions       | Description                               |
-|---------------|-------------------------------------------|
-| **arp_spoof** | Execute ARP Spoofing                      |
-| **dhcp_starv**| Conduct DHCP Starvation                   |
-| **net_scan**  | Perform a Network Scan                    |
-| **syn_flood** | Initiate a SYN Flood Attack               |
-| **icmp_flood**| Initiate an ICMP Flood Attack             |
-| **ddos_post** | Perform a DDoS POST Request               |
-| **ddos_get**  | Perform a DDoS GET Request                |
+   | Actions       | Description                               |
+   |---------------|-------------------------------------------|
+   | **arp_spoof** | Execute ARP Spoofing                      |
+   | **dhcp_starv**| Conduct DHCP Starvation                   |
+   | **net_scan**  | Perform a Network Scan                    |
+   | **syn_flood** | Initiate a SYN Flood Attack               |
+   | **icmp_flood**| Initiate an ICMP Flood Attack             |
+   | **ddos_post** | Perform a DDoS POST Request               |
+   | **ddos_get**  | Perform a DDoS GET Request                |
 
 1. ARP Spoofing
    ```bash
