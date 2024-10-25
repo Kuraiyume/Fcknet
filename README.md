@@ -1,6 +1,6 @@
 # FckNet: Network Manipulation Toolkit
 
-FckNet is a versatile network manipulation tool that utilizes **Scapy** for all its features, enabling users to perform various network-related tasks. It supports several functionalities, including ARP spoofing, DHCP starvation, network scanning, SYN flooding, DDoS POST Req.
+FckNet is a relentless toolkit for network manipulation, designed to seize control, exploit weaknesses, and push the limits of network security. It equips you with the means to infiltrate, disrupt, and test the resilience of any network environment.
 
 ## Features
 
@@ -12,25 +12,34 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
 - **DDoS POST**: Launch a large number of POST requests to overwhelm a target system.
 - **DDoS GET**: Launch a large number of GET requests to overwhelm a target system.
 
-## Usage
+## Installation
 
-1. Run Fcknet with Root Privilege:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Kuraiyume/FckNet
+   ```
+
+2. Install the essential libraries:
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+   
+3. Run Fcknet with Root Privilege:
    ```
    sudo python3 fcknet.py
    ```
 
-2. Available Actions:
-- **arp_spoof:** Execute ARP Spoofing.
-- **dhcp_starv:** Conduct DHCP Starvation.
-- **net_scan:** Perform a Network Scan.
-- **syn_flood:** Initiate a SYN Flood Attack.
-- **icmp_flood:** Initiate an ICMP Flood Attack.
-- **ddos_post:** Perform DDoS POST Request.
-- **ddos_get:** Perform DDoS GET Request.
-- **help or h:** Display the list of commands.
-- **exit or quit:** Terminate the program.
-
 ## Commands && Parameters
+
+| Actions       | Description                               |
+|---------------|-------------------------------------------|
+| **arp_spoof** | Execute ARP Spoofing                      |
+| **dhcp_starv**| Conduct DHCP Starvation                   |
+| **net_scan**  | Perform a Network Scan                    |
+| **syn_flood** | Initiate a SYN Flood Attack               |
+| **icmp_flood**| Initiate an ICMP Flood Attack             |
+| **ddos_post** | Perform a DDoS POST Request               |
+| **ddos_get**  | Perform a DDoS GET Request                |
 
 1. ARP Spoofing
    ```bash
@@ -67,16 +76,11 @@ FckNet is a versatile network manipulation tool that utilizes **Scapy** for all 
    sudo python3 fcknet.py -a ddos_get -u <URL>  -pr <packet_rate> -t <threads> -d <duration> -psize <packet_size>
    ```
 
-## Requirements
-- Root Access: FckNet requires root privileges to perform its functions.
-- Python 3: Ensure that Python 3 is installed on your system.
-- Scapy: Ensure you have Scapy library installed because Scapy is the root core of this tool. (pip3 install scapy)
-
 ## Disclaimer
-- Use this tool responsibly and only on networks you have permission to test. Unauthorized use of this tool can lead to legal consequences.
+- This toolkit is intended strictly for educational purposes or authorized testing on networks you have explicit permission to assess. Misuse of FckNet can lead to severe legal consequences. Always obtain proper authorization before conducting any network manipulation or attack simulations.
 
 ## License
-- This project is licensed under the GNU General Public License.
+- This project is licensed under the GNU General Public License (GPL).
 
 ## Author
 - Kuraiyume (A1SBERG)
