@@ -85,5 +85,5 @@ FckNet is a relentless toolkit for network manipulation, designed to seize contr
 - This project is licensed under the GNU General Public License (GPL).
 
 ## [+] Author
-- Kuraiyume (A1SBERG)
+- Kuroshiro (A1SBERG)
 
